@@ -4,7 +4,9 @@ Willian Brito de Lima
 """
 
 class Cliente:
-    def __init__(self,id_cliente, nome_cliente, endereco, saldo_a_pagar):
+    """Classe de cliente, que será cadastrado na árvore"""
+    
+    def __init__(self, id_cliente, nome_cliente, endereco, saldo_a_pagar):
         self.id_cliente = id_cliente
         self.nome_cliente = nome_cliente
         self.endereco = endereco
@@ -14,32 +16,88 @@ class Cliente:
         self.dir=None
 
 class Arvore:
+    """Árvore binária de busca de clientes, organizada pelo id_cliente"""
 
     def __init__(self):
-        self.raiz=None
+        self.raiz = None
 
-    def insere_cliente(self,id, nome, end, saldo):
-        if self.raiz==None:
-            no=Cliente(id, nome, end, saldo)
-            self.raiz=no
-            return
-        q=None
-        p=self.raiz
-        while p and p.id_cliente != id :
-            q=p
-            if (id<p.id_cliente):
-                p=p.esq
+
+    def busca_cliente(self, id_busca, printar=True):
+        """
+        Retorna o ponteiro do cliente de idpassado como argumento e o ponteiro para o nó pai desse cliente \n
+        Caso `printar=True`, printa os dados do cliente encontrado (caso ele esteja na lista) e uma mensagem caso ele não esteja \n
+        Caso `printar=False`, apenas retorna os ponteiros sem printar nada
+        """
+        
+        pai_no = None
+        no = self.raiz
+        while no and no.id_cliente != id_busca:
+            pai_no = no
+
+            if id_busca < no.id_cliente:
+                no = no.esq
             else:
-                p=p.dir
+                no = no.dir
 
-        if p:
+        if printar:
+            if no.id_cliente == id_busca:
+                print(f'\nCliente id {no.id_cliente}: \nNome: {no.nome_cliente} | End.: {no.endereco} | Saldo a pagar: {no.saldo_a_pagar}')
+            else:
+                print('Cliente não cadastrado!')
+
+        return no, pai_no
+
+
+    def insere_cliente(self, id_cliente, nome, end, saldo):
+        """Insere um cliente na árvore"""
+        
+        if self.raiz == None:
+            no = Cliente(id_cliente, nome, end, saldo)
+            self.raiz = no
+            return
+        
+        no, pai_no = self.busca_cliente(id_cliente, printar=False)
+
+        if no:
             print('Já existe um cliente com esse id!')
             return
-        p=Cliente(id, nome, end, saldo)
-        if id<q.id_cliente:
-            q.esq = p
+        
+        no = Cliente(id_cliente, nome, end, saldo)
+        if id_cliente < pai_no.id_cliente:
+            pai_no.esq = no
         else:
-            q.dir = p
+            pai_no.dir = no
+
+
+    def altera_nome_cliente(self, id_cliente, novo_nome):
+        no, pai_no = self.busca_cliente(id_cliente, printar=False)
+
+        if no:
+            print(f'Nome do cliente de id {id_cliente} alterado de {no.nome_cliente} para {novo_nome}')
+            no.nome_cliente = novo_nome
+        else:
+            print('Não existe um cliente com esse id!')
+            
+            
+    def altera_endereco(self, id_cliente, novo_endereco):
+        no, pai_no = self.busca_cliente(id_cliente, printar=False)
+
+        if no:
+            print(f'Endereço do cliente de id {id_cliente} alterado de {no.endereco} para {novo_endereco}')
+            no.endereco = novo_endereco
+        else:
+            print('Não existe um cliente com esse id!')
+
+
+    def altera_saldo_a_pagar(self, id_cliente, novo_saldo):
+        no, pai_no = self.busca_cliente(id_cliente, printar=False)
+
+        if no:
+            print(f'Saldo a pagar do cliente de id {id_cliente} alterado de {no.saldo_a_pagar} para {novo_saldo}')
+            no.saldo_a_pagar = novo_saldo
+        else:
+            print('Não existe um cliente com esse id!')
+            
 
     def lista_preOrdem(self,p):
         if p:
@@ -58,6 +116,7 @@ class Arvore:
             self.lista_posOrdem(p.esq)
             self.lista_posOrdem(p.dir)
             print(f'no visitado em posOrdem: {p.id_cliente, p.nome_cliente, p.endereco, p.saldo_a_pagar}')
+
 
     def removeCliente(self,id):
         # p - contem a referencia para o no a ser retirado
@@ -147,3 +206,9 @@ arv.lista_preOrdem(arv.raiz)
 
 print('\nLista de devedores:')
 arv.lista_a_pagar(arv.raiz)
+
+arv.busca_cliente(45)
+
+arv.altera_endereco(45, 'rua 123abc')
+
+arv.busca_cliente(45)
