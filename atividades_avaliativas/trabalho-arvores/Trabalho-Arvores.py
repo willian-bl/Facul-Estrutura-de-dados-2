@@ -40,7 +40,7 @@ class Arvore:
                 no = no.dir
 
         if printar:
-            if no.id_cliente == id_busca:
+            if no and no.id_cliente == id_busca:
                 print(f'\nCliente id {no.id_cliente}: \nNome: {no.nome_cliente} | End.: {no.endereco} | Saldo a pagar: {no.saldo_a_pagar}')
             else:
                 print('Cliente não cadastrado!')
@@ -70,6 +70,8 @@ class Arvore:
 
 
     def altera_nome_cliente(self, id_cliente, novo_nome):
+        """Altera o nome de um cliente"""
+        
         no, pai_no = self.busca_cliente(id_cliente, printar=False)
 
         if no:
@@ -80,6 +82,7 @@ class Arvore:
             
             
     def altera_endereco(self, id_cliente, novo_endereco):
+        """Altera o endereço de um cliente"""
         no, pai_no = self.busca_cliente(id_cliente, printar=False)
 
         if no:
@@ -90,6 +93,8 @@ class Arvore:
 
 
     def altera_saldo_a_pagar(self, id_cliente, novo_saldo):
+        """Altera o saldo a pagar de um cliente"""
+
         no, pai_no = self.busca_cliente(id_cliente, printar=False)
 
         if no:
@@ -99,116 +104,128 @@ class Arvore:
             print('Não existe um cliente com esse id!')
             
 
-    def lista_preOrdem(self,p):
-        if p:
-            print(f'no visitado em preOrdem: {p.id_cliente, p.nome_cliente, p.endereco, p.saldo_a_pagar}')
-            self.lista_preOrdem(p.esq)
-            self.lista_preOrdem(p.dir)
+    def removeCliente(self, id): 
+        """Remove um cliente"""
+        # no_remover - contem a referencia para o no a ser retirado
+        # pai_remover - pai do nó que será retirado
+        # substituto - no que vai substituir no_remover
+        # pai_substituto - pai do no substituto
 
-    def lista_emOrdem(self,p):
-        if p:
-            self.lista_emOrdem(p.esq)
-            print(f'no visitado em emOrdem: {p.id_cliente, p.nome_cliente, p.endereco, p.saldo_a_pagar}')
-            self.lista_emOrdem(p.dir)
+        # Buscando qual nó tem o valor x e qual o pai desse nó
+        no_remover, pai_remover = self.busca_cliente(id, printar=False)
 
-    def lista_posOrdem(self,p):
-        if p:
-            self.lista_posOrdem(p.esq)
-            self.lista_posOrdem(p.dir)
-            print(f'no visitado em posOrdem: {p.id_cliente, p.nome_cliente, p.endereco, p.saldo_a_pagar}')
-
-
-    def removeCliente(self,id):
-        # p - contem a referencia para o no a ser retirado
-        # q - pai do no p
-        # v - no que vai substituir p
-        # t - pai do no v
-        # s - filho a esquerda de v
-        p = self.raiz
-        q = None
-        while p and p.id_cliente != id:
-            q = p
-            if id < p.id_cliente:
-                p = p.esq
-            else:
-                p = p.dir
-
-        if not p:
-            print(f'Nao cadastrado')
+        if not no_remover:              
+            print(f'Nó com id {id} não cadastrado!')    
             return
+        # Terminando essa parte, posicionamos os ponteiros pai_remover e no_remover corretamente
 
-        # posicionar o ponteiro v no no que ira substituir p
+        # posicionar o ponteiro substituto no nó que ira substituir no_remover
+        if not no_remover.esq:  
+            substituto=no_remover.dir 
 
-        if not p.esq:
-            v=p.dir
-        elif not p.dir:
-            v=p.esq
+        elif not no_remover.dir: 
+            substituto=no_remover.esq
+        
+        else:   
+            pai_substituto = no_remover  
+            substituto = no_remover.dir    
+           
+            while substituto.esq: 
+                pai_substituto = substituto
+                substituto = substituto.esq
+            # Nesse ponto substituto esta no sucessor em ordem de no_remover
+
+            if pai_substituto != no_remover: 
+                pai_substituto.esq = substituto.dir 
+               
+                # As próximas duas linhas de código ajustam as subárvores do substituto, movendo a subárvore esquerda
+                # e a subárvore direita do nó que estamos removendo para a esquerda/direita do substituto
+                substituto.dir = no_remover.dir
+            substituto.esq = no_remover.esq  
+
+        # Agora, devemos fazer com que o pai_remover aponte para o nó substituto, excluindo a referência do no_remover
+        if not pai_remover:         # no_remover é a raiz da arvore
+            self.raiz = substituto  
         else:
-            # p possui 2 subarvores. Posicionar v no sucessor emordem
-            # emOrdem de p (no mais a esquerda da subarvore direita) e
-            # e t no pai de v
-            t = p
-            v = p.dir
-            s = v.esq
-            while s:
-                t = v
-                v = s
-                s = v.esq
-            # Nesse ponto v esta no sucessor em orDem de p
-            if t != p:
-                # p nao é pai de v e v esta a esquerda de t
-                t.esq = v.dir
-                # remove o no v de sua posicao atual e
-                # coloca no lugar do no p
-                v.dir = p.dir
-            v.esq = p.esq
+            if no_remover == pai_remover.esq:  # Se o nó estiver à esquerda do pai
+                pai_remover.esq = substituto
+            else:  # Se estiver a direita
+                pai_remover.dir = substituto
 
-        if not q:
-            # p e a raiz da arvore
-            self.raiz = v
-        else:
-            if p == q.esq:
-                q.esq = v
-            else:
-                q.dir = v
-        p = None
+        no_remover = None
 
-    def contaNos(self,p):
 
+    def contaClientes(self, p):
+        """Extra - Conta o número de clientes"""
         if not p:
             return 0
         else:
-            return(1+self.contaNos(p.esq)+self.contaNos(p.dir))
+            return(1 + self.contaClientes(p.esq) + self.contaClientes(p.dir))
 
-    def lista_a_pagar(self,p):
+
+    def clientes_cadastrados_emOrdem(self, p):
+        """Mostra a lista dos clientes cadastrados utilizando o método em ordem"""
+        if p:
+            self.clientes_cadastrados_emOrdem(p.esq)
+            print(f'Cliente emOrdem: {p.id_cliente, p.nome_cliente, p.endereco, p.saldo_a_pagar}')
+            self.clientes_cadastrados_emOrdem(p.dir)
+
+
+    def lista_a_pagar(self, p):
+        """Lista todos os clientes que possuem saldo a pagar"""
         if p:
             self.lista_a_pagar(p.esq)
             if p.saldo_a_pagar > 0:
-                print(p.id_cliente, p.nome_cliente, p.saldo_a_pagar)
+                print(f'Devedor id {p.id_cliente}: {p.nome_cliente} deve {p.saldo_a_pagar}')
             self.lista_a_pagar(p.dir)
 
 
-arv=Arvore()
-arv.insere_cliente(80, 'Cliente1', 'Rua ABC', 55.3)
-arv.insere_cliente(40, 'Cliente2', 'Rua DEF', 22)
-arv.insere_cliente(45, 'Cliente3', 'Rua GHI', 0)
-arv.insere_cliente(90, 'Cliente4', 'Rua JKL', 220.2)
-arv.insere_cliente(120, 'Cliente5', 'Rua MNO', 0)
+    def lista_em_dia(self, p):
+        """Lista todos os clientes que não possuem saldo a pagar"""
+        if p:
+            self.lista_em_dia(p.esq)
+            if p.saldo_a_pagar == 0:
+                print(f'Cliente em dia: {p.id_cliente} - {p.nome_cliente}')
+            self.lista_em_dia(p.dir)
 
-print('Árvore: ')
-arv.lista_preOrdem(arv.raiz)
 
-print('\nRemovendo Cliente id 40: ')
-arv.removeCliente(40)
 
-print('\nDepois de remover: ')
-arv.lista_preOrdem(arv.raiz)
+# Testes
+def main():
+    
+    print('---------- Árvore ----------')
+    arv=Arvore()
+    arv.insere_cliente(2, 'Armando', 'Rua ABC', 55.3)
+    arv.insere_cliente(4, 'Beatriz', 'Av DEF', 26)
+    arv.insere_cliente(3, 'Carlos', 'Rua GHI', 0)
+    arv.insere_cliente(5, 'Daniela', 'Rua JKL', 220.2)
+    arv.insere_cliente(1, 'Estefany', 'Av MNO', 0)
 
-print('\nLista de devedores:')
-arv.lista_a_pagar(arv.raiz)
+    arv.clientes_cadastrados_emOrdem(arv.raiz)
 
-arv.busca_cliente(45)
+    print('\n---------- Remoção ----------')
+    id = 4
+    print(f'Removendo Cliente id {id}: ')
+    arv.removeCliente(id)
+    print('\nDepois de remover: ')
+    arv.clientes_cadastrados_emOrdem(arv.raiz)
 
-arv.altera_endereco(45, 'rua 123abc')
+    print('\n---------- Busca e alteração ----------')
+    id = 3
+    novo_end = 'Av Nova Avenida'
+    print(f'Buscando e printando cliente de id {id}')
+    arv.busca_cliente(id)
+    
+    arv.altera_endereco(id, novo_end)
 
-arv.busca_cliente(45)
+    arv.busca_cliente(id)
+    
+    print('\n---------- Lista de devedores ----------')
+    arv.lista_a_pagar(arv.raiz)
+
+    print('\n---------- Lista de clientes em dia ----------')
+    arv.lista_em_dia(arv.raiz)
+
+
+if __name__ == '__main__':
+    main()
