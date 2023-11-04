@@ -15,7 +15,7 @@ class Produto:
         self.esq=None
         self.dir=None
 
-class Arvore:
+class ArvoreProdutos:
     """
     Árvore binária de busca de produtos, organizada pelo id_produto
     Será cadastrada na árvore de clientes: cada cliente terá sua lista de produtos comprados
@@ -175,3 +175,47 @@ class Arvore:
             print(f'produto emOrdem: {p.id_produto, p.nome_produto, p.quantidade_consumida, p.preco_unitario}')
             self.produtos_cadastrados_emOrdem(p.dir)
 
+
+    def retorna_saldo(self, p):
+        if not p:
+            return 0
+
+        return p.quantidade_consumida * p.preco_unitario + \
+               self.retorna_saldo(p.esq) + \
+               self.retorna_saldo(p.dir)
+
+# Testes
+def main():
+    print('---------- Árvore ----------')
+    arv=ArvoreProdutos()
+    arv.insere_produto(5, 'Salgado', 5, 5)
+    arv.insere_produto(4, 'Refrigerante', 2, 6)
+    arv.insere_produto(3, 'Sobremesa', 1, 7.5)
+    arv.insere_produto(2, 'Sopa', 3, 8)
+    arv.insere_produto(1, 'Café', 2, 3.5)
+
+    arv.produtos_cadastrados_emOrdem(arv.raiz)
+
+    print('\n---------- Remoção ----------')
+    id = 4
+    print(f'Removendo Produto id {id}: ')
+    arv.remove_produto(id)
+    print('\nDepois de remover: ')
+    arv.produtos_cadastrados_emOrdem(arv.raiz)
+
+    print('\n---------- Busca e alteração ----------')
+    id = 3
+    novo_preco = 6.75
+    print(f'Buscando e printando produto de id {id}')
+    arv.busca_produto(id)
+    
+    arv.altera_preco_unitario(id, novo_preco)
+
+    arv.busca_produto(id)
+
+    print('\n---------- Busca e alteração ----------')
+    saldo = arv.atualiza_saldo(arv.raiz)
+    print(f'Saldo atual: {saldo}')
+
+if __name__ == '__main__':
+    main()

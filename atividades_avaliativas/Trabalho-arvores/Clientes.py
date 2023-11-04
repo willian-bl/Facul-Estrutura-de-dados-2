@@ -3,19 +3,24 @@ Trabalho sobre árvores - 11/10/2023
 Willian Brito de Lima
 """
 
+from Produtos import ArvoreProdutos
+
+
 class Cliente:
     """Classe de cliente, que será cadastrado na árvore"""
     
-    def __init__(self, id_cliente, nome_cliente, endereco, saldo_a_pagar):
+    def __init__(self, id_cliente, nome_cliente, endereco):
         self.id_cliente = id_cliente
         self.nome_cliente = nome_cliente
         self.endereco = endereco
-        self.saldo_a_pagar = saldo_a_pagar
+        self.saldo_a_pagar = 0
+        self.arvore_produto = ArvoreProdutos()
         
         self.esq=None
         self.dir=None
 
-class Arvore:
+
+class ArvoreClientes:
     """Árvore binária de busca de clientes, organizada pelo id_cliente"""
 
     def __init__(self):
@@ -27,6 +32,8 @@ class Arvore:
         Retorna o ponteiro do cliente de idpassado como argumento e o ponteiro para o nó pai desse cliente \n
         Caso `printar=True`, printa os dados do cliente encontrado (caso ele esteja na lista) e uma mensagem caso ele não esteja \n
         Caso `printar=False`, apenas retorna os ponteiros sem printar nada
+
+        Ordem do retorno: `(nó, pai do nó)`
         """
         
         pai_no = None
@@ -48,11 +55,11 @@ class Arvore:
         return no, pai_no
 
 
-    def insere_cliente(self, id_cliente, nome, end, saldo):
+    def insere_cliente(self, id_cliente, nome, end):
         """Insere um cliente na árvore"""
         
         if self.raiz == None:
-            no = Cliente(id_cliente, nome, end, saldo)
+            no = Cliente(id_cliente, nome, end)
             self.raiz = no
             return
         
@@ -62,7 +69,7 @@ class Arvore:
             print('Já existe um cliente com esse id!')
             return
         
-        no = Cliente(id_cliente, nome, end, saldo)
+        no = Cliente(id_cliente, nome, end)
         if id_cliente < pai_no.id_cliente:
             pai_no.esq = no
         else:
@@ -165,9 +172,13 @@ class Arvore:
 
     def clientes_cadastrados_emOrdem(self, p):
         """Mostra a lista dos clientes cadastrados utilizando o método em ordem"""
+
         if p:
             self.clientes_cadastrados_emOrdem(p.esq)
             print(f'Cliente emOrdem: {p.id_cliente, p.nome_cliente, p.endereco, p.saldo_a_pagar}')
+            print('Produtos:')
+            p.arvore_produto.produtos_cadastrados_emOrdem(p.arvore_produto.raiz)
+            print('')
             self.clientes_cadastrados_emOrdem(p.dir)
 
 
@@ -189,17 +200,54 @@ class Arvore:
             self.lista_em_dia(p.dir)
 
 
+    def adiciona_produto(self, id_cliente, id_produto, nome, qtd_consumida, preco):
+        no = self.busca_cliente(id_cliente, printar=False)[0]
+        arv_prods = no.arvore_produto
+        arv_prods.insere_produto(id_produto, nome, qtd_consumida, preco)
+
+        no.saldo_a_pagar = arv_prods.retorna_saldo(arv_prods.raiz)
+
+
+    def remove_produto(self, id_cliente, id_produto):
+        no = self.busca_cliente(id_cliente, printar=False)[0]
+        arv_prods = no.arvore_produto
+        arv_prods.remove_produto(id_produto)
+
+        no.saldo_a_pagar = arv_prods.retorna_saldo(arv_prods.raiz)
+
+
+    def altera_nome_produto(self, id_cliente, id_produto, novo_nome):
+        no = self.busca_cliente(id_cliente, printar=False)[0]
+        arv_prods = no.arvore_produto
+        arv_prods.altera_nome_produto(id_produto, novo_nome)
+
+
+    def altera_quantidade_consumida(self, id_cliente, id_produto, nova_qtd):
+        no = self.busca_cliente(id_cliente, printar=False)[0]
+        arv_prods = no.arvore_produto
+        arv_prods.altera_quantidade_consumida(id_produto, nova_qtd)
+
+        no.saldo_a_pagar = arv_prods.retorna_saldo(arv_prods.raiz)
+
+
+    def altera_preco_unitario(self, id_cliente, id_produto, novo_preco):
+        no = self.busca_cliente(id_cliente, printar=False)[0]
+        arv_prods = no.arvore_produto
+        arv_prods.altera_preco_unitario(id_produto, novo_preco)
+
+        no.saldo_a_pagar = arv_prods.retorna_saldo(arv_prods.raiz)
+    
 
 # Testes
 def main():
     
     print('---------- Árvore ----------')
-    arv=Arvore()
-    arv.insere_cliente(2, 'Armando', 'Rua ABC', 55.3)
-    arv.insere_cliente(4, 'Beatriz', 'Av DEF', 26)
-    arv.insere_cliente(3, 'Carlos', 'Rua GHI', 0)
-    arv.insere_cliente(5, 'Daniela', 'Rua JKL', 220.2)
-    arv.insere_cliente(1, 'Estefany', 'Av MNO', 0)
+    arv=ArvoreClientes()
+    arv.insere_cliente(2, 'Armando', 'Rua ABC')
+    arv.insere_cliente(4, 'Beatriz', 'Av DEF')
+    arv.insere_cliente(3, 'Carlos', 'Rua GHI')
+    arv.insere_cliente(5, 'Daniela', 'Rua JKL')
+    arv.insere_cliente(1, 'Estefany', 'Av MNO')
 
     arv.clientes_cadastrados_emOrdem(arv.raiz)
 
